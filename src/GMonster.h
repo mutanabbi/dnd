@@ -17,10 +17,10 @@ public:
   )
     : GChar(name, abil, lvl, hp), m_def(def)
   {}
-  unsigned short get_ac() const override { return m_def.get_ac(); }
-  unsigned short get_fort() const override { return m_def.get_fort(); }
-  unsigned short get_refl() const override { return m_def.get_refl(); }
-  unsigned short get_will() const override { return m_def.get_will(); }
+  unsigned short ac() const override { return m_def.ac(); }
+  unsigned short fort() const override { return m_def.fort(); }
+  unsigned short refl() const override { return m_def.refl(); }
+  unsigned short will() const override { return m_def.will(); }
   /// @todo Level
   /// @todo Role (Controller, Brude, Elete Controller/Brude)
   /// @todo XP Cost

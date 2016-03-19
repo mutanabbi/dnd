@@ -7,13 +7,13 @@ short get_proper_defence(const IAttack& attack, const IDefence& def)
   switch (attack.get_defence_type())
   {
     case DefenceType::AC:
-      return def.get_ac();
+      return def.ac();
     case DefenceType::FORT:
-      return def.get_fort();
+      return def.fort();
     case DefenceType::REFL:
-      return def.get_refl();
+      return def.refl();
     case DefenceType::WILL:
-      return def.get_will();
+      return def.will();
     default:
       assert(!"Can't be here");
   };

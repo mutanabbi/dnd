@@ -79,29 +79,29 @@ public:
     {
     }
 
-    unsigned short get_ac() const override
+    unsigned short ac() const override
     {
       /// @todo armor bonuses
       return base_defence()
-        + m_cls.get_ac_mod()
+        + m_cls.ac_mod()
         + std::max<>(m_mod.get_int_mod(), m_mod.get_dex_mod());
     }
-    unsigned short get_fort() const override
+    unsigned short fort() const override
     {
       return base_defence()
-        + m_cls.get_fort_mod()
+        + m_cls.fort_mod()
         + std::max<>(m_mod.get_str_mod(), m_mod.get_con_mod());
     };
-    unsigned short get_refl() const override
+    unsigned short refl() const override
     {
       return base_defence()
-        + m_cls.get_refl_mod()
+        + m_cls.refl_mod()
         + std::max<>(m_mod.get_int_mod(), m_mod.get_dex_mod());;
     };
-    unsigned short get_will() const override
+    unsigned short will() const override
     {
       return base_defence()
-        + m_cls.get_will_mod()
+        + m_cls.will_mod()
         + std::max<>(m_mod.get_cha_mod(), m_mod.get_wis_mod());;
     };
   /// @todo attacks : basicMellee, basicRange
