@@ -23,7 +23,7 @@ void parse_cmd(std::vector<std::string> args)
     auto result = do_attack(*attacker, *defender, melee_basic_attack);
     /// @todo now here is an overflowing. Iplement dying mechanic
     if (HitType::MISS != result.first && HitType::AUTO_MISS != result.first)
-      defender->hp(defender->hp() - result.second);
+      defender->hit(result.second);
 
     std::cout << attacker->name() << " ";
     if (HitType::MISS == result.first)

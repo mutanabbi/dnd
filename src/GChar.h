@@ -9,25 +9,28 @@
 #include <string>
 #include <iosfwd>
 
+#include <iostream>
 class GChar : public IDefence
 {
 public:
-    GChar(const std::string& name, const Abilities& abil, unsigned short lvl, short hp)
-      : m_name(name), m_abil(abil), m_mod(m_abil), m_lvl(lvl), m_hp(hp)
+    GChar(const std::string& name, const Abilities& abil, unsigned short lvl, short max_hp)
+      : m_name(name), m_abil(abil), m_mod(m_abil), m_lvl(lvl), m_max_hp(max_hp)
     {
       assert(lvl > 0);
     }
     const IAbilities& get_abilities() const { return m_abil; }
     const IAbilityModifiers& get_ability_modifiers() const { return m_mod; }
     const std::string& name() const { return m_name; }
-    unsigned hp() const { return m_hp; }
+    int hp() const { return m_hp; }
+    unsigned max_hp() const { return m_max_hp; }
     unsigned short lvl() const { return m_lvl; }
-
-    void hp(unsigned v)
-    {
-      m_hp = v;
-      /// @todo constraints
+    void hit(unsigned short dmg) {
+      std::cout << "HP before: " << m_hp << std::endl;
+      m_hp -= dmg;
+      std::cout << "HP after: " << m_hp << std::endl;
     }
+    unsigned bloodied_hp() const { return max_hp() / 2; }
+    bool bloodied() const { return m_hp <= bloodied_hp(); }
 
     /// @todo Use nonvirtual interface
     virtual unsigned short lvl_bonus() const { return 0; };
@@ -44,11 +47,8 @@ private:
     /// @todo Initiative
     /// @todo Speed
     unsigned short m_lvl = 1;
-    unsigned m_hp = 0;
-
-
-    /// @todo BaseDefence: 10 + LevelBonus (level/2)
-    /// @todo Bloodied
+    const unsigned short m_max_hp = 0;
+    int m_hp = m_max_hp;
 
     /// @todo Align
     /// @todo Equipment
@@ -65,13 +65,13 @@ public:
     , const GClass& cls
     , const Abilities& abil
     , unsigned short lvl = 1
-    , std::experimental::optional<short> hp = std::experimental::nullopt
+    , std::experimental::optional<short> max_hp = std::experimental::nullopt
     )
       : GChar(
           name
         , abil
         , lvl
-        , hp ? *hp
+        , max_hp ? *max_hp
              : cls.get_start_hp() + cls.get_per_lvl_hp() * (lvl - 1) + AbilityModifiers(abil).get_con_mod()
         )
       , m_mod(get_ability_modifiers())
