@@ -4,7 +4,10 @@
 #include <Dice.h>
 #include <boost/msm/front/state_machine_def.hpp>
 #include <boost/msm/front/functor_row.hpp>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 #include <boost/msm/back/state_machine.hpp>
+#pragma GCC diagnostic pop
 #include <boost/mpl/vector.hpp>
 #include <boost/none.hpp>
 #include <iostream>
@@ -21,31 +24,31 @@ struct saving_throw_failure {};
 struct saving_throw_success {};
 struct saving_throw_critical_success {};
 
-inline std::ostream& operator<<(std::ostream& os, const damaged& event)
+inline std::ostream& operator<<(std::ostream& os, const damaged&)
 {
   os << "damaged";
   return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const healed& event)
+inline std::ostream& operator<<(std::ostream& os, const healed&)
 {
   os << "healed";
   return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const saving_throw_success& event)
+inline std::ostream& operator<<(std::ostream& os, const saving_throw_success&)
 {
   os << "saved by a throw";
   return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const saving_throw_critical_success& event)
+inline std::ostream& operator<<(std::ostream& os, const saving_throw_critical_success&)
 {
   os << "saved by a critical successefull throw";
   return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const saving_throw_failure& event)
+inline std::ostream& operator<<(std::ostream& os, const saving_throw_failure&)
 {
   os << "failed a throw";
   return os;

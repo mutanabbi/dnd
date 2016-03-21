@@ -63,11 +63,11 @@ do_attack(const GChar& attacker, const GChar& defencer, const IAttack& pwr)
   auto attack_result = roll + attacker.lvl_bonus() + ability_mod + pwr.get_bonus();
   auto defence_result = get_proper_defence(pwr, defencer);
 
-  if (roll == 20 && attack_result >= defence_result)
+  if (roll == 20 && static_cast<int>(attack_result) >= defence_result)
     hit = HitType::CRITICAL_HIT;
-  else if (roll == 20 && attack_result < defence_result)
+  else if (roll == 20 && static_cast<int>(attack_result) < defence_result)
     hit = HitType::AUTO_HIT;
-  else if (attack_result >= defence_result)
+  else if (static_cast<int>(attack_result) >= defence_result)
     hit = HitType::HIT;
 
   if (hit != HitType::MISS && hit != HitType::AUTO_MISS)

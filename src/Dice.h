@@ -2,6 +2,7 @@
 
 #include <random>
 #include <iostream>
+#include <functional>
 #include <type_traits>
 #include <cassert>
 
@@ -42,6 +43,7 @@ using d10_dice = Dice<10>;
 using d20_dice = Dice<20>;
 using d100_dice = Dice<100>;
 
+/// @todo Get rid these variables. Use a factory
 static d4_dice d2;
 static d4_dice d4;
 static d6_dice d6;

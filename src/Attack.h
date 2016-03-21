@@ -90,10 +90,10 @@ class CharAttack : public IAttack
 {
 public:
   CharAttack(short modifier, AbilityType ability, DefenceType defence, unsigned short dmg)
-    : m_mod(modifier), m_abil(ability), m_df(defence), m_dmg(dmg)
+    : m_abil(ability), m_df(defence), m_mod(modifier), m_dmg(dmg)
   {}
   CharAttack(short modifier, AbilityType ability, DefenceType defence, D20DicePool dmg)
-    : m_mod(modifier), m_abil(ability), m_df(defence), m_dmg(dmg)
+    : m_abil(ability), m_df(defence), m_mod(modifier), m_dmg(dmg)
   {}
   unsigned short get_bonus() const override { return m_mod; }
   DefenceType get_defence_type() const override { return m_df; }

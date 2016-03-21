@@ -30,7 +30,7 @@ public:
       std::cout << "HP after: " << m_hp << std::endl;
     }
     unsigned bloodied_hp() const { return max_hp() / 2; }
-    bool bloodied() const { return m_hp <= bloodied_hp(); }
+    bool bloodied() const { return m_hp <= static_cast<int>(bloodied_hp()); }
 
     /// @todo Use nonvirtual interface
     virtual unsigned short lvl_bonus() const { return 0; };
@@ -74,8 +74,8 @@ public:
         , max_hp ? *max_hp
              : cls.get_start_hp() + cls.get_per_lvl_hp() * (lvl - 1) + AbilityModifiers(abil).get_con_mod()
         )
-      , m_mod(get_ability_modifiers())
       , m_cls(cls)
+      , m_mod(get_ability_modifiers())
     {
     }
 

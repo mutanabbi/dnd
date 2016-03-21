@@ -10,4 +10,4 @@ add_executable(
 target_link_libraries(dnd PUBLIC core "${Readline_LIBRARY}")
 target_include_directories(dnd PUBLIC "${Readline_INCLUDE_DIRS}")
 
-ADD_SUBDIRECTORY( tests )
+add_subdirectory(tests)
