@@ -1,4 +1,5 @@
 #include <readline/readline.h>
+#include <readline/history.h>
 #include <Console.h>
 #include <sstream>
 #include <algorithm>

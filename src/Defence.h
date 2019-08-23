@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Idefence.h"
+#include "IDefence.h"
 
 class Defence : public IDefence
 {
