@@ -6,7 +6,7 @@ Try to find readline include dirs and libraries. The module provides
 the following components:
 
 - ``readline`` the main library
-- ``histroy`` history library
+- ``history`` history library
 
 Usage example:
 
