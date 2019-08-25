@@ -1,11 +1,12 @@
-#include <Dice.h>
-#include <GChar.h> /// @todo replace to GPersonage.h
-#include <GMonster.h>
-#include <Attack.h>
-#include <Console.h>
+#include "Attack.h"
+#include "Console.h"
+#include "Dice.h"
+#include "GChar.h"                                          /// @todo replace to GPersonage.h
+#include "GMonster.h"
+
+#include <cassert>
 #include <iostream>
 #include <memory>
-#include <cassert>
 
 std::unordered_map<std::string, std::unique_ptr<GChar>> g_chars;
 

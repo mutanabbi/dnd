@@ -1,9 +1,25 @@
-include_directories("${GTEST_INCLUDE_DIRS}")
-link_libraries("${GTEST_BOTH_LIBRARIES}" Threads::Threads)
-add_executable(ModificatorCalcTest ModificatorCalcTest.cpp)
-add_executable(DeathStateMachineTest DeathStateMachineTest.cpp)
-target_include_directories(DeathStateMachineTest PUBLIC "${Boost_INCLUDE_DIRS}")
-target_link_libraries(DeathStateMachineTest PUBLIC core)
-set(GTEST_ARGS --gtest_shuffle --gtest_repeat=3)
-gtest_add_tests(ModificatorCalcTest SOURCES ModificatorCalcTest.cpp)
-gtest_add_tests(DeathStateMachineTest SOURCES DeathStateMachineTest.cpp)
+add_executable(
+    ModificatorCalcTest
+    ModificatorCalcTest.cpp
+)
+target_link_libraries(
+    ModificatorCalcTest
+    PRIVATE
+        core
+        GTest::GTest
+        GTest::Main
+  )
+gtest_discover_tests(ModificatorCalcTest)
+
+add_executable(
+    DeathStateMachineTest
+    DeathStateMachineTest.cpp
+  )
+target_link_libraries(
+    DeathStateMachineTest
+    PRIVATE
+        core
+        GTest::GTest
+        GTest::Main
+  )
+gtest_discover_tests(DeathStateMachineTest)
