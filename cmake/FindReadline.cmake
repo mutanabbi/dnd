@@ -96,7 +96,6 @@ if(Readline_FOUND)
         "${CMAKE_BINARY_DIR}"
         "${CMAKE_CURRENT_LIST_DIR}/realine_version.c"
         LINK_LIBRARIES Readline::readline
-        COMPILE_OUTPUT_VARIABLE zz
         RUN_OUTPUT_VARIABLE Readline_VERSION
       )
 endif()
