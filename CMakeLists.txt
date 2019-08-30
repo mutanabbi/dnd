@@ -1,21 +1,31 @@
-cmake_minimum_required(VERSION 3.3)
+# ALERT Always use the latest available release!
+cmake_minimum_required(VERSION 3.14)
 
-project(dnd VERSION 0.0.1 LANGUAGES CXX)
+project(
+    dnd
+    DESCRIPTION "The DND Game" # TODO Provide a better description
+    HOMEPAGE_URL "https://github.com/mutanabbi/dnd"
+    VERSION 0.0.1
+    LANGUAGES CXX C
+  )
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++1y -Wall -Wextra")
-# @todo Fix gcc abi problem: -DCMAKE_CXX_COMPILER=g++-5 -DCMAKE_CXX_FLAGS="-D_GLIBCXX_USE_CXX11_ABI=0"
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 # I suppose I'm gonna need some of them
+# TODO Use 1.70 w/ native CMake support!
 find_package(
     Boost 1.57 REQUIRED COMPONENTS
-#    asio
-#    msm
-#    optional
-)
-enable_testing()
-#set(GTEST_ROOT "/usr/local/lib/")
+    # NOTE Keep the list of components sorted
+    thread
+  )
+
+find_package(Readline 7.0 REQUIRED COMPONENTS readline)
 find_package(GTest)
-find_package(Threads)
-find_package(Readline REQUIRED)
+
+include(CTest)
+enable_testing()
 
 add_subdirectory(src)

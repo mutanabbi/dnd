@@ -1,10 +1,12 @@
+#include "Console.h"
+
 #include <readline/readline.h>
 #include <readline/history.h>
-#include <Console.h>
-#include <sstream>
+
 #include <algorithm>
-#include <iterator>
 #include <cassert>
+#include <iterator>
+#include <sstream>
 
 Console::cmd_status Console::operator()() const
 {
