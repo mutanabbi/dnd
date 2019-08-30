@@ -13,7 +13,7 @@
 #include <algorithm>
 #include <utility>
 #include <cassert>
-#include <iostream> /// @todo DEBUG ONLY
+//#include <iostream> /// @todo DEBUG ONLY
 
 class Section
 {
@@ -71,10 +71,17 @@ inline bool Section::is_reachable() const
     assert(m_to.point.x >= 0);
     assert(m_to.point.y >= 0);
 
-    using boost::rational_cast;
+    if (is_tile_occupied(m_to.tile) || is_tile_occupied(m_from.tile))
+        return false;
+
     // Get trajectory
     std::vector<Crossroad> crossroads = get_trajectory();
+
     assert(size(crossroads) > 1);
+    assert(!is_tile_occupied(crossroads.back().tile));
+
+    using boost::rational_cast;
+
     for (
         auto it = make_intersect_iterator(begin(crossroads))
       , last = make_intersect_iterator(end(crossroads))
@@ -83,6 +90,7 @@ inline bool Section::is_reachable() const
     )
     {
         // TODO: DEBUG ONLY
+        /*
         auto prnt_trajectory = [&cout = std::cout](const auto& vec) {
             cout << "[";
             for (const auto& c : vec)
@@ -90,144 +98,76 @@ inline bool Section::is_reachable() const
             (cout << "]\n").flush();
         };
         prnt_trajectory(crossroads);
+        */
 
-        auto& f = std::get<0>(*it);
-        auto& t = std::get<1>(*it);
+        auto [f, t] = *it;
         assert(
             1 == f.point.x.denominator()
           || 1 == f.point.y.denominator()
         );
+        assert(
+            1 == t.point.x.denominator()
+          || 1 == t.point.y.denominator()
+        );
 
-        // diagonal step
-        if (f.tile.x != t.tile.x && f.tile.y != t.tile.y)
+        if (f.point != t.point) // same points == different tiles
         {
-            if (is_tile_occupied(t.tile))
-                return false;
-            else if (
+            // here we sure f and t share a tile
+            assert(f.tile == t.tile);
+
+            if (is_tile_occupied(f.tile))
+            {
+                /// @todo Get rid of copypaste
+                if (
+                    line().is_horizontal()
+                  && 1 == f.point.y.denominator()
+                )
+                {
+                    // try to find alternative way
+                    assert(boost::rational_cast<unsigned>(t.point.y) >= t.tile.y);
+                    int delta = (boost::rational_cast<unsigned>(t.point.y) - t.tile.y) ? 1 : -1;
+                    assert((delta + static_cast<int>(t.tile.y)) >= 0);
+                    auto alt_t = Tile{
+                        t.tile.x
+                      , t.tile.y + delta
+                    };
+                    if (is_tile_occupied(alt_t))
+                        return false;
+                }
+                else if (
+                    line().is_vertical()
+                  && 1 == f.point.x.denominator()
+                )
+                {
+                    // try to find alternative way
+                    assert(boost::rational_cast<unsigned>(t.point.x) >= t.tile.x);
+                    int delta = (boost::rational_cast<unsigned>(t.point.x) - t.tile.x ? 1 : -1);
+                    assert((delta + static_cast<int>(t.tile.x)) >= 0);
+                    auto alt_t = Tile{
+                        t.tile.x + delta
+                      , t.tile.y
+                    };
+                    if (is_tile_occupied(alt_t))
+                        return false;
+                }
+                else
+                    return false;
+            } // end if current tile occupied
+        } // end if f and t share a current tile
+        else if (
+            1 == f.point.x.denominator()
+          && 1 == f.point.y.denominator()
+        ) // diagonal throught a node
+        {
+            assert(f.tile != t.tile);
+            if (
                 is_tile_occupied({f.tile.x, t.tile.y})
               && is_tile_occupied({f.tile.y, t.tile.x})
-              ) return false;
-        }
-
-        // horizontal step
-        if (f.tile.x != t.tile.x)
-        {
-            assert(1 == t.point.x.denominator());
-            if (
-                1 == t.point.y.denominator() // point lies on a vertical border btn tiles
-              && is_tile_occupied(t.tile) // destinition tile is occupied
-              && line().is_horizontal()
             )
-            {
-                // try to find alternative way
-                assert(boost::rational_cast<unsigned>(t.point.y) >= t.tile.y);
-                int delta = (boost::rational_cast<unsigned>(t.point.y) - t.tile.y) ? 1 : -1;
-                assert((delta + static_cast<int>(t.tile.y)) >= 0);
-                auto alt_t = Tile{
-                    t.tile.x
-                  , t.tile.y + delta
-                };
-                if (is_tile_occupied(alt_t))
-                    return false;
-
-                // TODO: DEBUG ONLY
-                std::cout << "alt:" << alt_t << std::endl;
-                t.tile = alt_t;
-            }
-        }
-
-        // vertical step
-        if (f.tile.y != t.tile.y)
-        {
-            assert(1 == t.point.y.denominator());
-            if (
-                1 == t.point.x.denominator() // point lies on a horizontal border btn tiles
-              && is_tile_occupied(t.tile) // destinition tile is occupied
-              && line().is_vertical()
-            )
-            {
-                // try to find alternative way
-                assert(boost::rational_cast<unsigned>(t.point.x) >= t.tile.x);
-                int delta = boost::rational_cast<unsigned>(t.point.x) - t.tile.x;
-                assert((delta + static_cast<int>(t.tile.x)) >= 0);
-                auto alt_t = Tile{
-                    t.tile.x + delta
-                  , t.tile.y
-                };
-                if (is_tile_occupied(alt_t))
-                    return false;
-
-                // TODO: DEBUG ONLY
-                std::cout << "alt:" << alt_t << std::endl;
-                t.tile = alt_t;
-            }
+                return false;
         }
     } // for
     return true;
-
-#if 0
-    using boost::rational_cast;
-    // Get trajectory
-    std::vector<Coordinate> crosspoints = get_trajectory(
-        rational_cast<unsigned>(m_from.point.x)
-      , rational_cast<unsigned>(m_from.point.y)
-      , rational_cast<unsigned>(m_to.point.x)
-      , rational_cast<unsigned>(m_to.point.y)
-      , m_line
-    );
-
-    // Check trajectory
-    for (const auto pt : crosspoints)
-    {
-        auto x = rational_cast<unsigned>(pt.x);
-        auto y = rational_cast<unsigned>(pt.y);
-        if (1 == pt.x.denominator() && 1 == pt.y.denominator())
-        {
-            assert(x >= 0);
-            assert(y >= 0);
-            unsigned hits = 0;
-
-            /// @todo It would be great to find a way how to bring an order to this mess
-            hits += (is_tile_occupied({x, y}) ? 1 : 0);
-
-            if (x > 0)
-            {
-                hits += (is_tile_occupied({x - 1, y}) ? 1 : 0);
-                if (y > 0)
-                    hits += (is_tile_occupied({x - 1, y - 1}) ? 1 : 0);
-            }
-
-            if (y > 0)
-                hits += (is_tile_occupied({x, y - 1}) ? 1 : 0);
-
-            if (hits > 1)
-                return false;
-        }
-        else if (1 == pt.x.denominator())
-        {
-            unsigned hits = 0;
-            hits += (is_tile_occupied({x, y}) ? 1 : 0);
-
-            if (x > 0)
-                hits += (is_tile_occupied({x - 1, y}) ? 1 : 0);
-
-            if (hits > 0)
-                return false;
-        }
-        else if (1 == pt.y.denominator())
-        {
-            unsigned hits = 0;
-            hits += (is_tile_occupied({x, y}) ? 1 : 0);
-
-            if (y > 0)
-                hits += (is_tile_occupied({x, y - 1}) ? 1 : 0);
-
-            if (hits > 0)
-                return false;
-        }
-    }
-    return true;
-#endif
 }
 
 inline std::vector<Crossroad> Section::get_trajectory() const
@@ -285,9 +225,6 @@ inline std::vector<Crossroad> Section::get_trajectory() const
             auto ct = detect_tile(c.back().tile, t);
             auto& pt = c.back().tile;                       // prev tile;
 
-            // TODO: DEBUG ONLY
-            // std::cout << "pt:" << pt << " f:" << f << " t:" << t << "ct: " << ct << std::endl;
-
             assert(pt.contains(f));
             assert(ct.contains(f));
 
@@ -303,253 +240,4 @@ inline std::vector<Crossroad> Section::get_trajectory() const
     if (crossroads.back() != to())
         crossroads.emplace_back(to());
     return crossroads;
-
-#if 0
-    /// @todo If size(v) == 0 it works incorrectly
-    crossroads = std::accumulate(
-        next(cbegin(v))
-      , cend(v)
-      , std::move(crossroads)
-      , [](std::vector<Crossroad> c, const Coordinate& pt) {
-            assert(pt.x >= 0);
-            assert(pt.y >= 0);
-
-            Tile prev_tile = c.back().tile;
-            Tile cur_tile = prev_tile;
-            Coordinate prev_pt = c.back().point;
-
-            /*
-            if (c.back().point != pt)
-                c.emplace_back(pt, cur_tile);               // do not cross tile border at first time
-
-            // do not cross tile boreder on last tile
-            if (c.back().tile == last_tile)
-            {
-                assert(c.back().point == pt);
-                return c;
-            }
-            */
-
-            using boost::rational_cast;
-
-            if (!is_belong(prev_tile, pt))
-            {
-            cur_tile.x = rational_cast<unsigned>(std::min(prev_pt.x, pt.x));
-            cur_tile.y = rational_cast<unsigned>(std::min(prev_pt.y, pt.y));
-                /*
-                if (1 == prev_pt.x.denominator())           // choose left or right tile
-                {
-                    if (prev_pt.x < pt.x)                   // left to right trajectory direction
-                    {
-                        // choose right tile
-                        //cur_tile.x += 1;
-                        //next_tile.x = rational_cast<unsigned>(pt.x);
-                        cur_tile.x += 1;
-                        //assert(prev_tile.x == next_tile.x - 1);
-                    }
-                    else if (pt.x < prev_pt.x)              // right to left trajectory direction
-                    {
-                        // choose left tile
-                        //assert(pt.x > 0);
-                        //assert(cur_tile.x > 0);
-                        //cur_tile.x -= 1;
-                        assert(cur_tile.x > 0);
-                        cur_tile.x -= 1;
-                        //next_tile.x = rational_cast<unsigned>(pt.x) - 1;
-                        //assert(prev_tile.x - 1 == next_tile.x);
-                    }
-                    // else
-                        //assert(prev_tile.y != rational_cast<unsigned>(pt.y));
-                        // vertical trajectory
-                        // next_tile.x = prev_tile.x
-                }
-
-                if (1 == prev_pt.y.denominator())           // choose top or bottom tile
-                {
-                    if (prev_pt.y < pt.y)                   // bottom to top trajectory direction
-                    {
-                        // choose top tile
-                        //cur_tile.y += 1;
-                        cur_tile.y += 1;
-                        //next_tile.y = rational_cast<unsigned>(pt.y);
-                        //assert(prev_tile.y == next_tile.y - 1);
-                    }
-                    else if (pt.y < prev_pt.y)              // top to bottom trajectory direction
-                    {
-                        // choose bottom tile
-                        //assert(pt.y > 0);
-                        //assert(cur_tile.y > 0);
-                        //cur_tile.y -= 1;
-                        assert(cur_tile.y > 0);
-                        cur_tile.y -= 1;
-                        //next_tile.y = rational_cast<unsigned>(pt.y) - 1;
-                        //assert(prev_tile.y - 1 == next_tile.y);
-                    }
-                    // else
-                        //assert(prev_tile.x != rational_cast<unsigned>(pt.x));
-                        // horisontal trajectory
-                        // next_tile.y = prev_tile.y
-                }
-                */
-
-                //assert(prev_tile != cur_tile);
-                // assert(cur_tile != next_tile);
-                // assert(is_belong(cur_tile, prev_pt));
-                //assert(is_belong(cur_tile, pt));
-                assert(is_belong(cur_tile, prev_pt));
-                c.emplace_back(prev_pt, cur_tile);          //????
-            }
-
-            assert(is_belong(cur_tile, pt));
-            c.emplace_back(pt, cur_tile);
-
-            /*
-            // but cross tile borders at second time
-            c.emplace_back(pt, next_tile);                  // ?????
-            */
-            return c;
-        }
-    );
-    /// @todo Do I need this condition? Check w/ assert
-    if (crossroads.back() != to())
-        crossroads.emplace_back(to());
-    return crossroads;
-#endif
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

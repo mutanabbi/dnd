@@ -2,14 +2,12 @@
 
 #include <array>
 #include <tuple>
+#include <algorithm>
 #include <utility>
 #include <cassert>
 
-/** @note WARN: NOT thread safe
- *  This class uses lazy initialization policy, so it isn't
- *  thread safe by default
- *
- *  @note Due to the fact the iterator returns tuple of references
+
+/** @note Due to the fact the iterator returns tuple of references
  *  on dereference it's category is @c LegacyInputIterator. It may
  *  cause luck of performance on using some standard algorithm w/
  *  this iterator like @c std::advance no matter will we support
@@ -21,55 +19,42 @@
  *  inject template overloads to @c std. Only full specializations
  *  are allowed.
  *
- *  @todo It's easy to make it TS by using call_once in
- *  @c lazy_init
+ *  @todo For now I can't see the way how to use FWD base iterators
+ *  w/ @c intersect_iterator since it's forbidden to increment singular
+ *  FWD iterator. It means we can't check intersec_iterator-s equality.
+ *  It's necessary to get distance between lower and greater iterators,
+ *  but since equality operator is symmetric and FWD iterator doesn't
+ *  provide comparation operation, we can't determine who is who.
+ *  It's still possible to make it range iterator (pass both iterators -
+ *  on a sequence begin and end), but I need to think about it
  */
 template <typename FwdIter, std::size_t N = 2>
 class intersect_iterator
 {
-    template <std::size_t... I>
-    static auto gen_arr_impl(
-        FwdIter it
-      , std::index_sequence<I...>
-      , bool do_increment = true
-    )
+    template <typename... T>
+    static auto get_refs_impl(std::tuple<T...>&& result, FwdIter&, std::integral_constant<std::size_t, 0>)
     {
-        return std::array<FwdIter, sizeof...(I)> {
-            ((void)I, (do_increment ? it++ : it))...
-        };
+        return result;
     }
 
-    template <std::size_t... I>
-    static auto gen_arr(
-        FwdIter it
-      , bool do_increment = true
-    )
+    template <typename... T, std::size_t C>
+    static auto get_refs_impl(std::tuple<T...>&& result, FwdIter& it, std::integral_constant<std::size_t, C>)
     {
-        return gen_arr_impl(
-            it
-          , std::make_index_sequence<N>{}
-          , do_increment
+        return get_refs_impl(
+            std::tuple_cat(std::move(result), std::tie(*it++))
+          , it
+          , std::integral_constant<std::size_t, C - 1>{}
         );
-    }
-
-    template <std::size_t... I>
-    auto get_refs_impl(std::index_sequence<I...>) const
-    {
-        return std::tie(*std::get<I>(m_iters)...);
     }
 
     auto get_refs() const
     {
-        return get_refs_impl(std::make_index_sequence<N>{});
-    }
-
-    void lazy_init() const
-    {
-        if (!m_init)
-        {
-            gen_arr(m_iters.front()).swap(m_iters);
-            m_init = true;
-        }
+        auto it = m_iter;
+        return get_refs_impl(
+            std::tuple<>{}
+          , it
+          , std::integral_constant<std::size_t, N>{}
+        );
     }
 
     class fake_ptr_proxy;
@@ -117,26 +102,30 @@ public:
     intersect_iterator(const intersect_iterator&) = default;
     intersect_iterator& operator=(const intersect_iterator&) = default;
 
-    explicit intersect_iterator(FwdIter it)
-      : m_iters(gen_arr(
-            std::move(it)
-          , /*do_increment=*/ false
-        ))
+    template <typename Iter>
+    explicit intersect_iterator(Iter it)
+      : m_iter(std::move(it))
     {
+        static_assert(
+            std::is_convertible<
+                typename std::iterator_traits<FwdIter>::iterator_category
+              , std::random_access_iterator_tag
+            >::value
+          , "intersect_iterator template argument must be a model of"
+            " LegacyRandomAccessIterator at least"
+        );
     }
 
     void swap(intersect_iterator& rhv) noexcept(noexcept(
-        std::declval<intersect_iterator>().m_iters.swap(rhv.m_iters)
+        std::declval<intersect_iterator>().m_iter.swap(rhv.m_iters)
     ))
     {
-        m_iters.swap(rhv.m_iters);
-        std::swap(m_init, rhv.m_init);
+        m_iter.swap(rhv.m_iter);
     }
 
     intersect_iterator& operator++()
     {
-        gen_arr(std::next(m_iters.front())).swap(m_iters);
-        m_init = true;
+        std::advance(m_iter, 1);
         return *this;
     }
 
@@ -147,33 +136,38 @@ public:
         return result;
     }
 
-    reference operator*() { lazy_init(); return get_refs(); }
-    auto operator*() const { lazy_init(); return get_refs(); }
+    reference operator*() { return get_refs(); }
+    auto operator*() const { return get_refs(); }
 
     // It doesn't make many sence to support -> since
     // result type is pointer to tuple and tuple doesn't
     // provide many members. But this is LegacyInputIterator
     // requirement. So lets be so.
-    pointer operator->() { lazy_init(); return get_refs(); }
-    auto operator->() const { lazy_init(); return get_refs(); }
+    pointer operator->() { return get_refs(); }
+    auto operator->() const { return get_refs(); }
 
     friend bool operator==(
         const intersect_iterator& lhv
       , const intersect_iterator& rhv
     )
     {
-        return lhv.m_iters.back() == rhv.m_iters.back();
+        return is_equal(
+            lhv.m_iter, rhv.m_iter, typename std::iterator_traits<FwdIter>::iterator_category{}
+        );
     }
 
 private:
-    /** @todo It's possible to get rid of a array an leave one
-     * iterator only. But it requires some tricks to generate
-     * result tuples, so I left it for the future
-     * Also it's important to make an attention to relative
-     * iterator comparation if that refactoring will take place
-     */
-    mutable std::array<FwdIter, N> m_iters;
-    mutable bool m_init = false;
+    static bool is_equal(
+        const FwdIter& lhv, const FwdIter& rhv, std::random_access_iterator_tag
+    )
+    {
+        auto [it1, it2] = std::minmax(lhv, rhv);
+        auto dist = std::distance(it1, it2);
+        assert(dist >= 0);
+        return static_cast<std::size_t>(dist) < N;
+    }
+
+    FwdIter m_iter;
 };
 
 

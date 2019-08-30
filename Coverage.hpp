@@ -42,6 +42,7 @@ inline cover check_cover(const Crossroad& from, const Tile& to)
         begin(sections)
       , end(sections)
       , [](const Section& lhv, const Section& rhv) {
+            assert(lhv.from() == rhv.from());
             // note this isn't real length. It's rather value that proportional
             // to length. Real formula to get lenght would be sqrt(pow(abs(dx),2) + (pow(abs(dy),2))
             // but sqrt operation isn't defined for rational numbers as well as
@@ -49,8 +50,17 @@ inline cover check_cover(const Crossroad& from, const Tile& to)
             auto length = [] (const Coordinate& a, const Coordinate b) {
                 return abs(a.x - b.x) + abs(a.y - b.y);
             };
-            return length(lhv.from().point, lhv.to().point)
-              < length(lhv.from().point, rhv.to().point);
+            return std::make_tuple(
+                lhv.line().a()
+              , lhv.line().b()
+              , lhv.line().c()
+              , length(lhv.from().point, lhv.to().point)
+            ) < std::make_tuple(
+                rhv.line().a()
+              , rhv.line().b()
+              , rhv.line().c()
+              , length(rhv.from().point, rhv.to().point)
+            );
       }
     );
     // Note unique is stable, so as soon as lines is softed in order
@@ -65,22 +75,26 @@ inline cover check_cover(const Crossroad& from, const Tile& to)
     auto n = std::distance(begin(sections), uniq_end);
     assert(n > 2 && n < 5 && "It's possible to have 3 or 4 unique lines only");
 
-    unsigned hits = std::accumulate(
+    auto reachable_end = std::remove_if(
         begin(sections)
       , uniq_end
-      , 0
-      , [](unsigned acum, const Section& sec) {
-            return acum + (sec.is_reachable() ? 1 : 0);
+      , [](const Section& sec) {
+            return !sec.is_reachable();
       }
     );
+
+    unsigned hits = std::distance(begin(sections), reachable_end);
 
     assert(hits < 5);
     switch (hits)
     {
     case 2:
-        return cover::total;
+        return uniq_end != cend(sections)
+            && uniq_end->line() == reachable_end->line()
+            ? cover::partial
+            : cover::total;
     case 3:
-        return 3 == n ? cover::no : cover::partial;
+        return uniq_end != cend(sections) ? cover::no : cover::partial;
     case 4:
         assert(4 == n);
         return cover::no;
