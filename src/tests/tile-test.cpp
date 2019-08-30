@@ -1,4 +1,4 @@
-#include "../Tile.hpp"
+#include "../geo/Tile.hpp"
 #include <boost/rational.hpp>
 #include <cassert>
 

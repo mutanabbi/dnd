@@ -1,5 +1,5 @@
-#include "../Section.hpp"
-#include "../Coordinate.hpp"
+#include "../geo/Section.hpp"
+#include "../geo/Coordinate.hpp"
 //#include <iostream> // TODO: DEBUG ONLY
 #include <cassert>
 

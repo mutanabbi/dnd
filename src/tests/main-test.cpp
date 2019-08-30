@@ -1,6 +1,6 @@
-#include "../Crossroad.hpp"
-#include "../Section.hpp"
-#include "../Coverage.hpp"
+#include "../geo/Crossroad.hpp"
+#include "../geo/Section.hpp"
+#include "../geo/Coverage.hpp"
 
 #include <iostream>
 #include <cassert>

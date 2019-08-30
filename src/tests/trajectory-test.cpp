@@ -1,5 +1,5 @@
-#include "../Trajectory.hpp"
-#include "../Coordinate.hpp"
+#include "../geo/Trajectory.hpp"
+#include "../geo/Coordinate.hpp"
 #include <iostream>
 #include <vector>
 #include <cassert>

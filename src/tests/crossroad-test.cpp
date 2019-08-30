@@ -1,5 +1,5 @@
-#include "../Crossroad.hpp"
-#include "../Section.hpp"
+#include "../geo/Crossroad.hpp"
+#include "../geo/Section.hpp"
 #include <vector>
 #include <iostream>
 #include <cassert>
