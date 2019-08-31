@@ -33,6 +33,8 @@ target_link_libraries(
         Readline::readline
   )
 
+add_subdirectory(geo)
+
 if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
