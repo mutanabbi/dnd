@@ -39,6 +39,11 @@ function (mk_geo_test NAME)
     gtest_discover_tests(${NAME})
 endfunction()
 
+# TODO: rename to coverage-test
+mk_geo_test(main-test)
+mk_geo_test(crossroad-test)
 mk_geo_test(intersect-iterator-test)
 mk_geo_test(line-test)
 mk_geo_test(section-test)
+mk_geo_test(tile-test)
+mk_geo_test(trajectory-test)
