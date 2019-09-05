@@ -16,5 +16,5 @@ before_install:
   - mkdir -p build/{gtest,dnd}
   - (cd build/gtest && /usr/bin/cmake /usr/src/gtest && make -j && sudo make install)
 
-script: (cd build/dnd && /usr/bin/cmake ../ && make -j && make test)
+script: (cd build/dnd && /usr/bin/cmake ../../ && make -j && make test)
 
