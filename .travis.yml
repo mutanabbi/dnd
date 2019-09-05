@@ -13,8 +13,8 @@ before_install:
   - sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
   - sudo apt-get update
   - sudo apt-get -y install cmake cmake-data libreadline-dev libboost-dev libboost-thread-dev libgtest-dev
+  - echo "AA|${CXX}|AA"
   - (cd /usr/src/gtest && sudo sh -c "cmake . && make -j && make install")
-  - apt list --installed | grep boost
 
 script: echo "AA|${CXX}|AA" && mkdir build && (cd build && /usr/bin/cmake ../ && make -j && make test)
 
