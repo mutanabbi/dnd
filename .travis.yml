@@ -14,6 +14,7 @@ before_install:
   - sudo apt-get update
   - sudo apt-get -y install cmake cmake-data libreadline-dev libboost-dev libgtest-dev
   - (cd /usr/src/gtest && sudo sh -c "cmake . && make -j && make install")
+  - apt list --installed | grep boost
 
-script: mkdir build && (cd build && /usr/bin/cmake ../ && make -j && make test)
+script: echo "AA|${CXX}|AA" && mkdir build && (cd build && /usr/bin/cmake ../ && make -j && make test)
 
