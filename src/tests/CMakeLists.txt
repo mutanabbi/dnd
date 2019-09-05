@@ -24,26 +24,25 @@ target_link_libraries(
   )
 gtest_discover_tests(DeathStateMachineTest)
 
-function (mk_geo_test NAME)
-    add_executable(
-        ${NAME}
-        ${NAME}.cpp
-    )
-    target_link_libraries(
-        ${NAME}
-        PRIVATE
-            geo
-            GTest::GTest
-            GTest::Main
-      )
-    gtest_discover_tests(${NAME})
-endfunction()
-
+add_executable(
+    geo-tests
 # TODO: rename to coverage-test
-mk_geo_test(main-test)
-mk_geo_test(crossroad-test)
-mk_geo_test(intersect-iterator-test)
-mk_geo_test(line-test)
-mk_geo_test(section-test)
-mk_geo_test(tile-test)
-mk_geo_test(trajectory-test)
+    main-test.cpp
+    crossroad-test.cpp
+    intersect-iterator-test.cpp
+    line-test.cpp
+    section-test.cpp
+    tile-test.cpp
+    trajectory-test.cpp
+  )
+
+target_link_libraries(
+    geo-tests
+    PRIVATE
+        geo
+        GTest::GTest
+        GTest::Main
+  )
+
+gtest_discover_tests(geo-tests)
+
