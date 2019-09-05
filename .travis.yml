@@ -8,13 +8,13 @@ compiler:
   - gcc
 
 before_install:
-  - sudo apt-get update
   - sudo apt-get -y install apt-transport-https ca-certificates gnupg software-properties-common wget
   - wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add
   - sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
+  - sudo apt-get update
   - sudo apt-get -y install cmake libreadline-dev libboost-dev libgtest-dev
   - echo `cmake --version`
   - (cd /usr/src/gtest && sudo sh -c "cmake . && make -j && make install")
 
-script: echo `cmake` --version && mkdir build && (cd build && echo `cmake --version` && cmake ../ && make -j && make test)
+script: echo `cmake --version` && mkdir build && (cd build && echo `cmake --version` && cmake ../ && make -j && make test)
 
