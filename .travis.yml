@@ -15,4 +15,4 @@ before_install:
   - sudo apt-get -y install cmake libreadline-dev libboost-dev libgtest-dev
   - (cd /usr/src/gtest && sudo sh -c "cmake . && make -j && make install")
 
-script: mkdir build && (cd build && cmake ../ && make -j && make test
+script: mkdir build && (cd build && cmake ../ && make -j && make test)
