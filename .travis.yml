@@ -1,0 +1,20 @@
+language: cpp
+
+dist:
+  - bionic
+
+compiler:
+  - clang
+  - gcc
+
+before_install:
+  - sudo apt-get -y install apt-transport-https ca-certificates gnupg software-properties-common wget
+  - wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add
+  - sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
+  - sudo apt-get update
+  - sudo apt-get -y install cmake cmake-data libreadline-dev libboost-dev libboost-thread-dev libgtest-dev
+  - mkdir -p build/{gtest,dnd}
+  - (cd build/gtest && /usr/bin/cmake /usr/src/gtest && make -j && sudo make install)
+
+script: (cd build/dnd && /usr/bin/cmake ../../ && make -j && make test)
+
