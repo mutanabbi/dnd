@@ -14,6 +14,7 @@ before_install:
   - sudo apt-get update
   - sudo apt-get -y install cmake libreadline-dev libboost-dev libgtest-dev
   - echo `cmake --version`
+  - apt list --installed | grep cmake
   - (cd /usr/src/gtest && sudo sh -c "cmake . && make -j && make install")
 
 script: echo `cmake --version` && mkdir build && (cd build && echo `cmake --version` && cmake ../ && make -j && make test)
