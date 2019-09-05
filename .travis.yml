@@ -13,6 +13,6 @@ before_install:
   - wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | sudo apt-key add
   - sudo apt-add-repository 'deb https://apt.kitware.com/ubuntu/ bionic main'
   - sudo apt-get -y install cmake libreadline-dev libboost-dev libgtest-dev
-  - (cd /usr/src/gtest && cmake CMakeLists.txt && make -j && sudo make install)
+  - (cd /usr/src/gtest && sudo sh -c "cmake . && make -j && make install")
 
 script: mkdir build && (cd build && cmake ../ && make -j && make test
